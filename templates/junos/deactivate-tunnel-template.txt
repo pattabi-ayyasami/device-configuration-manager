@@ -1,0 +1,26 @@
+<rpc>
+    <edit-config>
+        <target>
+            <candidate/>
+        </target>
+        <default-operation>none</default-operation>
+        <config>
+            <configuration xmlns="http://xml.juniper.net/xnm/1.1/xnm">
+                <protocols>
+                     <mpls>
+                         #foreach( $path in $paths )
+                         <path operation="delete">
+                              <name>$path.name</name>
+                          </path>
+                          #end ## end #foreach
+                         
+                          <label-switched-path operation="delete">
+                              <name>tunnel-te$tunnel_id</name>
+                          </label-switched-path>
+                             
+                      </mpls>
+                  </protocols>
+              </configuration>
+          </config>
+    </edit-config>
+</rpc>

@@ -1,0 +1,149 @@
+##
+## JUNOS RSVP NON-PCEP TUNNEL CREATE TEMPLATE
+##
+
+#macro(paths $paths)
+   
+#foreach( $path in $paths )
+
+#if( $foreach.count == 1 )
+<primary>
+    <name>$path.name</name>
+
+                                    #if( $bandwidth_in_bps != $null )
+                                    <bandwidth>
+                                        <per-traffic-class-bandwidth>$bandwidth_in_bps</per-traffic-class-bandwidth>
+                                    </bandwidth>
+                                    #end
+
+                                    #if( $path.standby == True )
+                                    <standby/>
+                                    #end
+
+                                    <setup-priority>$priority_setup</setup-priority>
+                                    <reservation-priority>$priority_hold</reservation-priority>
+
+                                    #if( $hop_limit != $null )
+                                    <hop-limit>$hop_limit</hop-limit>
+                                    #end
+
+                                    <admin-group>
+                                        <include-any></include-any>
+                                        <include-all></include-all>
+                                        <exclude></exclude>
+                                    </admin-group>
+
+</primary>
+
+#else
+<secondary>
+    <name>$path.name</name>
+
+                                    #if( $bandwidth_in_bps != $null )
+                                    <bandwidth>
+                                        <per-traffic-class-bandwidth>$bandwidth_in_bps</per-traffic-class-bandwidth>
+                                    </bandwidth>
+                                    #end
+
+                                    #if( $path.standby == True )
+                                    <standby/>
+                                    #end
+
+                                    <setup-priority>$priority_setup</setup-priority>
+                                    <reservation-priority>$priority_hold</reservation-priority>
+
+                                    #if( $hop_limit != $null )
+                                    <hop-limit>$hop_limit</hop-limit>
+                                    #end
+
+                                    <admin-group>
+                                        <include-any></include-any>
+                                        <include-all></include-all>
+                                        <exclude></exclude>
+                                    </admin-group>
+
+</secondary>
+
+#end  ## end #if
+                
+#end  ## end #foreach
+#end  ## end #macro
+
+#set( $bandwidth_in_bps = $null )
+#if( $bandwidth != $null ) 
+#set( $bandwidth_in_bps = $bandwidth * 1000000 )
+#end
+
+<rpc>
+    <edit-config>
+        <target>
+            <candidate/>
+        </target>
+    <config>
+        <configuration xmlns="http://xml.juniper.net/xnm/1.1/xnm">
+                  <protocols>
+                        <mpls>
+
+							#foreach( $path in $paths )
+                            <path>
+                                <name>$path.name</name>
+                                #set( $hops = $path.hops )
+                                #foreach( $hop in $hops )
+                                    <path-list>
+                                        <name>$hop.interface</name>
+                                        #if( $hop.type == "strict" )
+                                            <strict></strict>
+                                        #end
+                                    </path-list>
+                                #end ## end #foreach
+                            </path>
+                            #end ## end #foreach
+
+
+                            <!-- Configure LSP Tunnel -->
+                            <label-switched-path>
+                                <name>tunnel-te${tunnel_id}</name>
+                                <to>${destination}</to>
+
+                                #if( $bandwidth_in_bps != $null )
+                                <bandwidth>
+                                    <per-traffic-class-bandwidth>${bandwidth_in_bps}</per-traffic-class-bandwidth>
+                                </bandwidth>
+                                #end
+
+                                <setup-priority>$priority_setup</setup-priority>
+
+                                <reservation-priority>$priority_hold</reservation-priority>
+
+								#if( $metric != $null )
+                                <metric>${metric}</metric>
+                                #end
+                                
+                                #if( $hop_limit != $null )
+                                <hop-limit>$hop_limit</hop-limit>
+                                #end
+
+                                #if( $fast_reroute != $null)
+                                <fast-reroute>
+                                    #if( $bandwidth_in_bps != $null )
+                                        <bandwidth>${bandwidth_in_bps}</bandwidth>
+                                    #end
+                                </fast-reroute>
+                                #end
+
+                                <admin-group>
+                                    <include-any></include-any>
+                                    <include-all></include-all>
+                                    <exclude></exclude>
+                                </admin-group>
+                                
+                                #paths($paths)
+
+
+                            </label-switched-path>
+                        </mpls>
+                    </protocols>
+              </configuration>
+        </config>
+    </edit-config>
+</rpc>

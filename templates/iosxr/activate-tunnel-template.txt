@@ -1,0 +1,41 @@
+#######################################################
+#### Cisco IOS XR RSVP Tunnel Template
+#######################################################
+
+#macro(paths $paths)
+   
+#foreach( $path in $paths )
+
+    explicit-path name $path.name
+    
+    #set( $hops = $path.hops )
+    #foreach( $hop in $hops )
+        index $foreach.count next-address $hop.type ipv4 unicast $hop.interface
+    #end
+    
+#end
+#end
+
+#########################################
+terminal length 0
+config t
+
+#paths($paths)
+
+interface tunnel-te $tunnel_id
+destination $destination
+ipv4 unnumbered Loopback 0
+signalled-name tunnel-te$tunnel_id
+priority $priority_setup $priority_hold
+
+#if( $metric == $null)
+    autoroute announce
+#else
+    autoroute announce metric absolute $metric
+#end
+
+record-route
+
+#foreach( $path in $paths )
+    path-option $path.path_option explicit name $path.name
+#end

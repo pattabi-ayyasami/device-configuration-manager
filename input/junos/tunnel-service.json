@@ -1,0 +1,43 @@
+{
+    "tunnel_id": 15,
+    "tunnel_name": "tunnel-te15",
+    "setup_priority": 6,
+    "hold_priority": 5,
+    "destination": "4.4.4.4",
+    "bandwidtth": 10,
+    "hop_limit": 10,
+    "metric": 200,
+    
+    "paths": [
+        {
+            "path_option": 1,
+            "path_name": "tunnel-te15_1",
+             "standby": false,
+             "hops": [
+                 {
+                     "interface": "13.13.13.1",
+                     "type": "strict"
+                 },
+                 {
+                     "interface": "13.13.13.2",
+                     "type": "strict"
+                 }
+             ]
+        },
+        {
+            "path_option": 2,
+            "path_name": "tunnel-te15_2",
+            "standby": false,
+            "hops": [
+                 {
+                     "interface": "23.23.23.1",
+                     "type": "strict"
+                 },
+                 {
+                     "interface": "23.23.23.2",
+                     "type": "strict"
+                 }
+             ]
+        }
+    ]
+}

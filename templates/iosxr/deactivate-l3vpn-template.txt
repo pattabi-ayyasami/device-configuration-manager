@@ -1,0 +1,29 @@
+#########################################################
+## IOS XR L3VPN Full Mesh Template
+#######################################################
+
+#macro(site $site)
+
+#set( $routing_protocol = $site.site_network_accesses.site_network_access.routing_protocols.routing_protocol.type )
+
+no vrf $service_attributes.vrf_name
+
+interface $site.site_network_accesses.site_network_access.provider_edge.interface_name
+ no vrf $service_attributes.vrf_name
+ no ipv4 address $site.site_network_accesses.site_network_access.ip_connection.ipv4.provider_address/$site.site_network_accesses.site_network_access.ip_connection.ipv4.mask
+
+#if ( $routing_protocol == "ospf" )
+no router ospf $service_attributes.ospf_id
+#end
+
+router bgp $service_attributes.local_as_number
+ no vrf $service_attributes.vrf_name
+
+#end
+
+################################################################
+
+config t
+
+#site($site)
+

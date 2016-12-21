@@ -1,0 +1,71 @@
+#########################################################
+## IOS XR L3VPN Full Mesh Template
+#######################################################
+terminal length 0
+
+config t
+
+
+#set( $routing_protocol = $site.site_network_accesses.site_network_access.routing_protocols.routing_protocol.type )
+
+#if ($routing_protocol == "ospf" )
+#set( $address_family = $site.site_network_accesses.site_network_access.routing_protocols.routing_protocol.ospf.address_family )
+#else
+#set( $address_family = $site.site_network_accesses.site_network_access.routing_protocols.routing_protocol.bgp.address_family )
+
+#end
+
+#if( $address_family == "ipv4-unicast" )
+#set( $addr_family = "ipv4 unicast" )
+#else
+#set( $addr_family = "ipv6 unicast" )
+#end
+
+vrf $service_attributes.vrf_name
+ address-family $addr_family
+ import route-target $service_attributes.route_target
+ export route-target $service_attributes.route_target
+
+interface $site.site_network_accesses.site_network_access.provider_edge.interface_name
+ vrf $service_attributes.vrf_name
+ ipv4 address $site.site_network_accesses.site_network_access.ip_connection.ipv4.provider_address/$site.site_network_accesses.site_network_access.ip_connection.ipv4.mask
+
+#if ( $routing_protocol == "ospf" )
+
+router ospf $service_attributes.ospf_id vrf $service_attributes.vrf_name
+  router-id $site.site_network_accesses.site_network_access.ip_connection.ipv4.provider_address
+  ##domain-id type 0105 value $service_attributes.domain_id
+  redistribute bgp $service_attributes.local_as_number
+  address-family $addr_family
+  area $site.site_network_accesses.site_network_access.routing_protocols.routing_protocol.ospf.area_address interface $site.site_network_accesses.site_network_access.provider_edge.interface_name
+
+router bgp $service_attributes.local_as_number
+ vrf $service_attributes.vrf_name
+  rd $service_attributes.route_distinguisher
+  address-family $addr_family
+      redistribute ospf $service_attributes.ospf_id
+
+#elseif ( $routing_protocol == "bgp" )
+
+route_policy pass_all
+  pass
+end_policy
+
+router bgp $service_attributes.local_as_number
+ vrf $service_attributes.vrf_name
+  rd $service_attributes.route_distinguisher
+  address-family $addr_family
+   redistribute connected
+  neighbor $site.site_network_accesses.site_network_access.ip_connection.ipv4.customer_address
+   remote-as $site.site_network_accesses.site_network_access.routing_protocols.routing_protocol.bgp.autonomous_system
+
+   address_family ipv4 unicast
+    route-policy pass-all in
+    route-policy pass-all out
+    as-override
+    
+    #if( $site.site_network_accesses.site_network_access.routing_protocols.routing_protocol.bgp.site_of_origin != $null )
+        site-of-origin $site.site_network_accesses.site_network_access.routing_protocols.routing_protocol.bgp.site_of_origin
+    #end
+
+#end   ## if

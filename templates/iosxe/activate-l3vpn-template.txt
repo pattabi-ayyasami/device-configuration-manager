@@ -1,0 +1,42 @@
+#########################################################
+## IOS XE L3VPN Full Mesh Template
+#######################################################
+
+config t
+
+#set( $routing_protocol = $site.site_network_accesses.site_network_access.routing_protocols.routing_protocol.type )
+
+ip vrf $service_attributes.vrf_name
+ rd $service_attributes.route_distinguisher
+ route-target export $service_attributes.route_target
+ route-target import $service_attributes.route_target
+
+interface $site.site_network_accesses.site_network_access.provider_edge.interface_name
+ ip vrf forwarding $service_attributes.vrf_name
+ ip address $site.site_network_accesses.site_network_access.ip_connection.ipv4.provider_address $site.site_network_accesses.site_network_access.ip_connection.ipv4.mask
+ negotiation auto
+
+#if ( $routing_protocol == "ospf" )
+
+router ospf $service_attributes.ospf_id vrf $service_attributes.vrf_name
+ log-adjacency-changes
+ redistribute bgp $service_attributes.local_as_number
+ network $site.site_network_accesses.site_network_access.ip_connection.ipv4.provider_address 255.255.255.255 area $site.site_network_accesses.site_network_access.routing_protocols.routing_protocol.ospf.area_address
+
+router bgp $service_attributes.local_as_number
+ address-family ipv4 vrf $service_attributes.vrf_name
+  redistribute ospf $service_attributes.ospf_id
+ exit-address-family
+
+#elseif ( $routing_protocol == "bgp" )
+
+router bgp $service_attributes.local_as_number
+ address-family ipv4 vrf $service_attributes.vrf_name
+  redistribute connected
+ exit-address-family
+
+ neighbor $site.site_network_accesses.site_network_access.ip_connection.ipv4.customer_address remote-as $site.site_network_accesses.site_network_access.routing_protocols.routing_protocol.bgp.autonomous_system
+
+#end
+
+end

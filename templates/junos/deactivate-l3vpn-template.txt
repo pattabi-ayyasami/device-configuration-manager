@@ -1,0 +1,46 @@
+#########################################################
+## IOS XR L3VPN Full Mesh Template
+#######################################################
+
+#macro(site $site)
+
+            <configuration xmlns="http://xml.juniper.net/xnm/1.1/xnm">
+	        <interfaces>
+
+	            <interface>
+		        <name>$site.site_network_accesses.site_network_access.provider_edge.interface_name</name>
+	 	        <unit>
+		 	    <name>0</name>
+			    <family>
+			        <inet>
+		                    <address operation="delete">
+		                        <name>$site.site_network_accesses.site_network_access.ip_connection.ipv4.provider_address/$site.site_network_accesses.site_network_access.ip_connection.ipv4.mask</name>
+		                    </address>
+		                </inet>
+		            </family>
+		        </unit>
+		    </interface>
+
+		</interfaces>
+
+		<routing-instances>
+                    <instance operation="delete">
+		        <name>$service_attributes.vrf_name</name>
+		    </instance>
+		</routing-instances>
+            </configuration>
+
+#end
+
+<rpc> 
+    <edit-config>
+        <target>
+            <candidate/>
+        </target>
+        <config>
+
+        #site($site)
+
+        </config>
+    </edit-config>
+</rpc>

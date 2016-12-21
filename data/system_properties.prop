@@ -1,0 +1,8 @@
+[DEVICE_INFORMATION]
+
+node_type=iosxr
+host=10.61.35.106
+user=test
+password=test123
+netconf_port=830
+

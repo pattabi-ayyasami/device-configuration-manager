@@ -1,0 +1,243 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+    <devices xmlns="http://tail-f.com/ns/ncs">
+        <device tags="nocreate">
+            <name>{/source-node}</name>
+            <config>
+
+                <!-- Juniper JunOS section -->
+                <configuration xmlns="http://xml.juniper.net/xnm/1.1/xnm" tags="merge">
+                    <protocols>
+                        <mpls>
+
+                            <!-- Configure Named Path -->
+                            <path when="{'named-path'}">
+                                <name>{named-path/path-name}</name>
+                                <path-list>
+                                    <name>{path-hop/ip-address}</name>
+                                    <strict when="{type='strict'}"></strict>
+                                    <loose when="{type='loose'}"></loose>
+                                </path-list>
+                            </path>
+
+                            <!-- Configure LSP Tunnel -->
+                            <label-switched-path when="{'lsp'}">
+                                <name>{lsp/lsp-name}</name>
+                                <to>{destination-ip}</to>
+                                <inter-domain when="{inter-area='true'}"/>
+
+                                <bandwidth when="{bandwidth-bps>'0'}">
+                                    <per-traffic-class-bandwidth>{bandwidth-bps}</per-traffic-class-bandwidth>
+                                </bandwidth>
+
+                                <setup-priority>{setup-priority}</setup-priority>
+
+                                <reservation-priority>{hold-priority}</reservation-priority>
+
+                                <metric>{metric}</metric>
+
+                                <standby when="{standby='true'}"></standby>
+
+                                <hop-limit when="{hop-limit>'1'}">{hop-limit}</hop-limit>
+
+                                <fast-reroute when="{frr-enabled='true'}">
+                                    <bandwidth when="{bandwidth-bps>'0'}">{bandwidth-bps}</bandwidth>
+                                </fast-reroute>
+
+                                <admin-group>
+                                    <include-any>{include-any}</include-any>
+                                    <include-all>{include}</include-all>
+                                    <exclude>{exclude}</exclude>
+                                </admin-group>
+
+
+                                <primary>
+
+                                    <name>{lsp-path[position()=1]/named-path}</name>
+
+                                    <bandwidth when="{bandwidth-bps>'0'}">
+                                        <per-traffic-class-bandwidth>{bandwidth-bps}</per-traffic-class-bandwidth>
+                                    </bandwidth>
+
+                                    <standby when="{standby='true'}"></standby>
+
+                                    <setup-priority>{setup-priority}</setup-priority>
+                                    <reservation-priority>{hold-priority}</reservation-priority>
+
+                                    <hop-limit when="{hop-limit>'1'}">{hop-limit}</hop-limit>
+
+                                    <admin-group>
+                                        <include-any>{include-any}</include-any>
+                                        <include-all>{include}</include-all>
+                                        <exclude>{exclude}</exclude>
+                                    </admin-group>
+
+                                </primary>
+
+                                <secondary>
+
+                                    <name>{lsp-path[position()!=1]/named-path}</name>
+
+                                    <bandwidth when="{bandwidth-bps>'0'}">
+                                        <per-traffic-class-bandwidth>{bandwidth-bps}</per-traffic-class-bandwidth>
+                                    </bandwidth>
+
+                                    <standby when="{standby='true'}"></standby>
+
+                                    <setup-priority>{setup-priority}</setup-priority>
+                                    <reservation-priority>{hold-priority}</reservation-priority>
+
+                                    <hop-limit when="{hop-limit>'1'}">{hop-limit}</hop-limit>
+
+                                    <admin-group>
+                                        <include-any>{include-any}</include-any>
+                                        <include-all>{include}</include-all>
+                                        <exclude>{exclude}</exclude>
+                                    </admin-group>
+
+                                </secondary>
+
+
+                            </label-switched-path>
+                        </mpls>
+                    </protocols>
+                </configuration>
+
+
+                <!-- Cisco IOS-XR Section -->
+                <explicit-path xmlns="http://tail-f.com/ned/cisco-ios-xr"
+                               tags="merge"
+                               when="{'named-path'}">
+                    <name>
+                        <pathname>{named-path/path-name}</pathname>
+                        <index>
+                            <index-id>{path-hop/index}</index-id>
+                            <keyword when="{ip-address}">next-address</keyword>
+                            <hop-type when="{ip-address}">{type}</hop-type>
+                            <ipv4 when="{ip-address}">
+                                <unicast>{ip-address}</unicast>
+                            </ipv4>
+                            <keyword when="{label}">next-label</keyword>
+                            <label when="{label}">{label}</label>
+                        </index>
+                    </name>
+                </explicit-path>
+
+                <interface xmlns="http://tail-f.com/ned/cisco-ios-xr"
+                           tags="merge"
+                           when="{'te:lsp'}">
+                    <tunnel-te>
+                        <id>{lsp/tunnel-id}</id>
+
+                        <ipv4>
+                            <address when="{ip-address}">
+                                <ip>{ip-address/ip}</ip>
+                                <mask>{ip-address/mask}</mask>
+                            </address>
+                            <unnumbered>
+                                <Loopback>{loop-back}</Loopback>
+                            </unnumbered>
+                        </ipv4>
+
+                        <destination>{destination-ip}</destination>
+
+                        <priority>
+                            <setup>{setup-priority}</setup>
+                            <hold-value>{hold-priority}</hold-value>
+                        </priority>
+
+                        <signalled-bandwidth >
+                        	<bandwidth when="{bandwidth-bps>'0'}">{round (bandwidth-bps div 1000)}</bandwidth>
+                        </signalled-bandwidth>
+
+                        <signalled-name>{lsp-name}</signalled-name>
+
+                        <load-share when="{load-share-bps>'0'}">{load-share-bps}</load-share>
+
+                        <auto-bw when="{metric='0'}"></auto-bw>
+
+                        <autoroute when="{metric-type='auto-route'}">
+                            <announce></announce>
+                            <metric when="{metric>'0'}">
+                                <relative when="{metric-relative='true'}">{metric}</relative>
+                                <absolute when="{metric-relative='false'}">{metric}</absolute>
+                            </metric>
+                        </autoroute>
+
+                        <fast-reroute when="{frr-enabled='true'}"></fast-reroute>
+                        <affinity>
+                            <exclude>
+                                <name>{exclude}</name>
+                            </exclude>
+                            <include>
+                                <name>{include-any}</name>
+                            </include>
+                            <include-strict>
+                                <name>{include}</name>
+                            </include-strict>
+                        </affinity>
+
+
+                        <path-option>
+                            <preference-priority>{lsp-path/path-option}</preference-priority>
+                            <segment-routing when="{segment-routing}"/>
+                            <explicit when="{path-type='explicit'}">
+                                <name>{named-path}</name>
+                            </explicit>
+
+                            <dynamic when="{path-type='dynamic'}"/>
+                        </path-option>
+
+                        <record-route/>
+
+                    </tunnel-te>
+                </interface>
+
+                <!-- End Cisco IOS-XR Section -->
+
+                <!-- Coriant Tellabs Section -->
+                <rsvp-path xmlns="http://tail-f.com/ned/coriant-smartrouter"
+                           tags="merge"
+                           when="{'named-path'}">
+                    <name>{named-path/path-name}</name>
+                    <hop>
+                        <address>{path-hop/ip-address}</address>
+                        <mode>{type}</mode>
+                    </hop>
+                </rsvp-path>
+
+                <rsvp-trunk xmlns="http://tail-f.com/ned/coriant-smartrouter"
+                        tags="merge"
+                        when="{'lsp'}">
+                    <name>{lsp/lsp-name}</name>
+                    <from  when="{ip-address}">
+                        <address>{ip-address/ip}</address>
+                    </from>
+                    <to>
+                        <address>{destination-ip}</address>
+                    </to>
+                    <primary>
+                        <path>{lsp-path[position()=1]/named-path}</path>
+                        <retry-timer>60</retry-timer>
+                        <label-record/>
+                        <elsp-preconfigured/>
+                        <wait-to-restore>120000</wait-to-restore>
+                        <cspf tags="delete"/>
+                    </primary>
+                    <secondary when="{lsp-path[position()!=1]/named-path}">
+                        <path>{lsp-path[position()!=1]/named-path}</path>
+                        <retry-timer>60</retry-timer>
+                        <label-record/>
+                        <elsp-preconfigured/>
+                        <wait-to-restore>120000</wait-to-restore>
+                        <cspf tags="delete"/>
+                    </secondary>
+                    <map-route when="{metric-type='auto-route'}">
+                        <address>{destination-ip}/32</address>
+                    </map-route>
+                </rsvp-trunk>
+                <!-- End Coriant Tellabs Section -->
+
+            </config>
+        </device>
+    </devices>
+</config-template>

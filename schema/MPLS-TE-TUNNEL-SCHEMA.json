@@ -1,0 +1,260 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "mpls-te-tunnel",
+  "type": "object",
+  "description": "MPLS Tunnel Service JSON Schema Definition",
+  "definitions": {
+    "Hop": {
+      "type": "object",
+      "properties": {
+        "node": {
+          "type": "string",
+          "description": "Next hop node",
+          "customData": {
+            "label": "Node",
+            "access": "read-only"
+          }
+        },
+        "interface": {
+          "type": "string",
+          "description": "Next hop interface in the node",
+          "customData": {
+            "label": "Interface",
+            "access": "read-only"
+          }
+        },
+        "type": {
+          "enum": [
+            "strict",
+            "loose",
+            "exclude"
+          ],
+          "description": "Hop type",
+          "customData": {
+            "label": "Hop Type",
+            "access": "read-only"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "Path": {
+      "type": "object",
+      "properties": {
+        "path-option": {
+          "type": "integer",
+          "description": "Path priority is a required parameter. Lower number has higher priority.",
+          "customData": {
+            "label": "Path Priority",
+            "access": "create-only"
+          }
+        },
+        "type": {
+          "enum": [
+            "explicit"
+          ],
+          "description": "Path type",
+          "customData": {
+            "label": "Path Type",
+            "access": "create-only",
+            "visible": false,
+            "editable": false
+          },
+          "default": "explicit"
+        },
+        "name": {
+          "type": "string",
+          "description": "Path name",
+          "customData": {
+            "label": "Path Name",
+            "access": "create-only",
+            "visible": false,
+            "editable": false
+          }
+        },
+        "hops": {
+          "type": "array",
+          "description": "Tunnel path hops. Hops will be displayed in the service topology view. Hops information will be part of service details response. Applicable only if the type is explicit.",
+          "items": {
+            "$ref": "#/definitions/Hop"
+          },
+          "customData": {
+            "visible": false,
+            "access": "read-only"
+          }
+        }
+      },
+      "required": [
+        "path-option"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "tunnel-id": {
+      "type": "integer",
+      "description": "Tunnel ID is a required parameter.  Valid value is an integer between 0 and 65535.",
+      "customData": {
+        "label": "Tunnel ID",
+        "access": "create-only"
+      },
+      "minimum": 0,
+      "maximum": 65535
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the tunnel.",
+      "customData": {
+        "label": "Tunnel Name",
+        "access": "read-only",
+        "visible": false
+      }
+    },
+    "type": {
+      "enum": [
+        "p2p"
+      ],
+      "description": "Type of the tunnel. Valid value is p2p",
+      "customData": {
+        "label": "Tunnel Type",
+        "access": "create-only",
+        "editable": false
+      },
+      "default": "p2p"
+    },
+    "signaling-protocol": {
+      "enum": [
+        "rsvp"
+      ],
+      "description": "Signaling protocol. Valid value is rsvp",
+      "customData": {
+        "label": "Signaling Protocol",
+        "access": "create-only",
+        "editable": false
+      },
+      "default": "rsvp"
+    },
+    "source": {
+      "type": "string",
+      "description": "Source/Head end node name is a required parameter.",
+      "customData": {
+        "label": "Source",
+        "access": "create-only"
+      }
+    },
+    "destination": {
+      "type": "string",
+      "description": "Destination/Tail end node name is a required parameter",
+      "customData": {
+        "label": "Destination",
+        "access": "create-only"
+      }
+    },
+    "pcep": {
+      "type": "boolean",
+      "description": "Indicate if this is a PCEP tunnel or not",
+      "customData": {
+        "label": "PCEP",
+        "access": "create-only"
+      },
+      "default": false
+    },
+    "priority-setup": {
+      "type": "integer",
+      "description": "Setup priority is an optional parameter. Valid value is an integer between 0 and 7 and the default is 7",
+      "customData": {
+        "label": "Setup Priority",
+        "access": "read-write"
+      },
+      "minimum": 0,
+      "maximum": 7,
+      "default": 7
+    },
+    "priority-hold": {
+      "type": "integer",
+      "description": "Hold priority is an optional parameter. Valid value is an integer between 0 and 7 and the default is 7",
+      "customData": {
+        "label": "Hold Priority",
+        "access": "read-write"
+      },
+      "minimum": 0,
+      "maximum": 7,
+      "default": 7
+    },
+    "hop-limit": {
+      "type": "integer",
+      "description": "Hop limit an optional parameter. The default value is 255.",
+      "customData": {
+        "label": "Hop Limit",
+        "access": "read-write"
+      },
+      "default": 255
+    },
+    "routing-choice": {
+      "enum": [
+        "autoroute"
+      ],
+      "description": "Routing choice is an optional parameter. Valid value is autoroute",
+      "customData": {
+        "label": "Routing Choice",
+        "access": "create-only",
+        "editable": false,
+        "visible": false
+      },
+      "default": "autoroute"
+    },
+    "bandwidth-type": {
+      "enum": [
+        "auto",
+        "explicit"
+      ],
+      "description": "Bandwidth type is an optional parameter. Valid values are auto and explicit.",
+      "customData": {
+        "label": "Bandwidth Type",
+        "access": "read-write"
+      }
+    },
+    "bandwidth": {
+      "type": "number",
+      "description": "Bandwidth is an optional parameter. Applicable only if bandwidth-type is explicit. Unit is in mbps. Valid value is a decimal within a range [0...1000].",
+      "customData": {
+        "label": "Bandwidth",
+        "unit": "mbps",
+        "access": "read-write"
+      },
+      "minimum": 0,
+      "maximum": 1000
+    },
+    "metric": {
+      "type": "integer",
+      "description": "Absolute metric value is an optional parameter. Valid value is an integer within a range [0...16777215 ].",
+      "customData": {
+        "label": "Metric",
+        "access": "read-write"
+      },
+      "minimum": 1,
+      "maximum": 16777215
+    },
+    "paths": {
+      "type": "array",
+      "description": "Tunnel Paths. Atleast one or more explicit paths must be specified fot the tunnel.",
+      "items": {
+        "$ref": "#/definitions/Path"
+      },
+      "customData": {
+        "access": "read-write"
+      },
+      "minItems": 1,
+      "maxItems": 10,
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "tunnel-id",
+    "source",
+    "destination",
+    "pcep",
+    "paths"
+  ],
+  "additionalProperties": false
+}

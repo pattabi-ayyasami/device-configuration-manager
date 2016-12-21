@@ -1,0 +1,44 @@
+{
+  "l3vpn_svc": {
+    "vpn_svc": {
+      "topology": "any_to_any"
+    },
+    "sites": {
+      "site": [
+        {
+          "site_network_accesses": {
+            "site_network_access": {
+              "provider_edge": {
+                "router_name": "PE4",
+                "interface_name": "ge-0/0/1"
+              },
+              "ip_connection": {
+                "ipv4": {
+                  "provider_address": "10.1.1.2",
+                  "mask": 24
+                }
+              },
+              "routing_protocols": {
+                "routing_protocol": {
+                  "type": "ospf",
+                  "ospf": {
+                    "address_family": "ipv4 unicast",
+                    "area_address": "0"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "service_attributes": {
+    "vrf_name": "pattabi",
+    "route_target": "65000:13",
+    "route_distinguisher": "6500:13",
+    "local_autonomous_system": "65001",
+    "domain_id": "139",
+    "policy_name": "bgp-into-ospf"
+  }
+}

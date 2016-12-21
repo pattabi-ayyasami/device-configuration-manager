@@ -1,0 +1,17 @@
+#######################################################
+#### Cisco IOS XR RSVP Tunnel Template
+#######################################################
+
+#macro(paths $paths)
+   
+#foreach( $path in $paths )
+    no explicit-path name $path.name
+#end
+#end
+
+#########################################
+terminal length 0
+config t
+
+#paths($paths)
+no interface tunnel-te $tunnel_id

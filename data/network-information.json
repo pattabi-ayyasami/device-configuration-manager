@@ -1,0 +1,72 @@
+{
+    "PE1": {
+        "type": "junos",
+        "host": "10.61.35.100",
+        "user": "test",
+        "password": "test123",
+        "bgp_id": 65001
+    },
+    "P1": {
+        "type": "junos",
+        "host": "10.61.35.101",
+        "user": "test",
+        "password": "test123",
+        "bgp_id": 65001
+    },
+    "P3": {
+        "type": "junos",
+        "host": "10.61.35.102",
+        "user": "test",
+        "password": "test123",
+        "bgp_id": 65001
+    },
+    "P5": {
+        "type": "iosxe",
+        "host": "10.61.35.103",
+        "user": "test",
+        "password": "test123",
+        "bgp_id": 65001
+    },
+    "PE3": {
+        "type": "junos",
+        "host": "10.61.35.104",
+        "user": "test",
+        "password": "test123",
+        "bgp_id": 65001
+    },
+    "PE2": {
+        "type": "iosxr",
+        "host": "10.61.35.105",
+        "user": "test",
+        "password": "test123",
+        "bgp_id": 65001
+    },
+    "P2": {
+        "type": "iosxr",
+        "host": "10.61.35.106",
+        "user": "test",
+        "password": "test123",
+        "bgp_id": 65001
+    },
+    "P4": {
+        "type": "iosxr",
+        "host": "10.61.35.107",
+        "user": "test",
+        "password": "test123",
+        "bgp_id": 65001
+    },
+    "P6": {
+        "type": "iosxr",
+        "host": "10.61.35.108",
+        "user": "test",
+        "password": "test123",
+        "bgp_id": 65001
+    },
+    "PE4": {
+        "type": "iosxr",
+        "host": "10.61.35.109",
+        "user": "test",
+        "password": "test123",
+        "bgp_id": 65001
+    }
+}

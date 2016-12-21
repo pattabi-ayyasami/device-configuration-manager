@@ -1,0 +1,137 @@
+#########################################################
+## IOS XR L3VPN Full Mesh Template
+#######################################################
+
+#macro(site $site)
+
+#set( $routing_protocol =$site.site_network_accesses.site_network_access.routing_protocols.routing_protocol.type )
+
+
+            <configuration xmlns="http://xml.juniper.net/xnm/1.1/xnm">
+	        <interfaces>
+	            <interface>
+		        <name>$site.site_network_accesses.site_network_access.provider_edge.interface_name</name>
+	 	        <unit>
+		 	    <name>0</name>
+			    <family>
+			        <inet>
+		                    <address>
+		                        <name>$site.site_network_accesses.site_network_access.ip_connection.ipv4.provider_address/$site.site_network_accesses.site_network_access.ip_connection.ipv4.mask</name>
+		                    </address>
+		                </inet>
+		            </family>
+		        </unit>
+		    </interface>
+		</interfaces>
+
+                <policy-options>
+                    <policy-statement>
+                        <name>bgp-into-ospf</name>
+                        <term>
+                            <name>bgp-only</name>
+                            <from>
+                                <protocol>bgp</protocol>
+                            </from>
+                            <then>
+                                <accept/>
+                            </then>
+                        </term>
+                    </policy-statement>
+                    <policy-statement>
+                        <name>ospf-into-bgp</name>
+                        <term>
+                            <name>ospf-only</name>
+                            <from>
+                                <protocol>ospf</protocol>
+                                <area>0.0.0.0</area>
+                            </from>
+                        </term>
+                        <then>
+                            <accept/>
+                        </then>
+                    </policy-statement>
+                    <policy-statement>
+                        <name>redis-connected</name>
+                        <term>
+                            <name>connected-only</name>
+                            <from>
+                                <protocol>direct</protocol>
+                            </from>
+                        </term>
+                        <then>
+                            <accept/>
+                        </then>
+                    </policy-statement>
+                </policy-options>
+	
+
+		<routing-instances>
+                    <instance>
+		        <name>$service_attributes.vrf_name</name>
+		        <instance-type>vrf</instance-type>
+		        <interface>
+		            <name>$site.site_network_accesses.site_network_access.provider_edge.interface_name</name>
+			</interface>
+			<route-distinguisher>
+			    <rd-type>$service_attributes.route_distinguisher</rd-type>
+			</route-distinguisher>
+		        <vrf-target>
+			    <import>target:$service_attributes.route_target</import>
+			    <export>target:$service_attributes.route_target</export>
+			</vrf-target>
+			<vrf-table-label/>
+
+			<protocols>
+
+#if ( $routing_protocol == "ospf" )
+			    <ospf>
+                                <domain-id>$service_attributes.domain_id</domain-id>
+                                <export>bgp-into-ospf</export>
+				<area>
+				    <name>$site.site_network_accesses.site_network_access.routing_protocols.routing_protocol.ospf.area_address</name>
+				    <interface>
+				        <name>$site.site_network_accesses.site_network_access.provider_edge.interface_name</name>
+				    </interface>
+				</area>
+			    </ospf>
+
+#elseif ( $routing_protocol == "bgp" )
+                           <bgp>
+                               <export>redis-connected</export> 
+                               <local-as>$service_attributes.local_as_number</local-as>
+                               <group>
+                                   <name>ebgp</name>
+                                   <type>external</type>
+                                   <advertise-peer-as/>
+                                   <family>
+                                       <inet>
+                                         <unicast/>
+                                       </inet>
+                                   </family>
+                                   <neighbor>
+                                       <address>$site.site_network_accesses.site_network_access.ip_connection.ipv4.customer_address</address>
+                                       <peer-as>$site.site_network_accesses.site_network_access.routing_protocols.routing_protocol.bgp.autonomous_system</peer-as>
+                                       <as-override/>
+                                   </neighbor>
+                               </group>
+                           </bgp> 
+#end
+			</protocols>
+		    </instance>
+		</routing-instances>
+            </configuration>
+
+#end
+
+<rpc> 
+    <edit-config>
+        <target>
+            <candidate/>
+        </target>
+        <config>
+
+        #site($site)
+
+        </config>
+    </edit-config>
+</rpc>

@@ -1,0 +1,8 @@
+#########################################################
+## IOS XE L3VPN Full Mesh Template
+#######################################################
+
+
+config t
+no ip vrf $service_attributes.vrf_name
+end
